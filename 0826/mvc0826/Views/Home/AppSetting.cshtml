@@ -1,0 +1,22 @@
+@using mvc0826
+
+@inject IAppSettingsTransient transient
+@inject IAppSettingsScoped scoped
+@inject IAppSettingsSingleton singleton
+
+<table border="1">
+    <tr><td colspan="2">Controller</td></tr>
+    <tr><td>Lifetimes</td><td>Name</td></tr>
+    <tr><td>Transient</td><td>@ViewBag.TransientName</td></tr>
+    <tr><td>Scoped</td><td>@ViewBag.ScopedName</td></tr>
+    <tr><td>Singleton</td><td>@ViewBag.SingletonName</td></tr>
+</table>
+<hr />
+<table border="1">
+    <tr><td colspan="2">View</td></tr>
+    <tr><td>Lifetimes</td><td>Name</td></tr>
+    <tr><td>Transient</td><td>@transient.Name</td></tr>
+    <tr><td>Scoped</td><td>@scoped.Name</td></tr>
+    <tr><td>Singleton</td><td>@singleton.Name'</td><</tr>
+</table>
+<hr />
