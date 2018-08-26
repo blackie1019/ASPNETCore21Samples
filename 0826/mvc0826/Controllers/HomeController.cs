@@ -5,36 +5,68 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using mvc0826.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace mvc0826.Controllers
 {
     public class HomeController : Controller
     {
-        public IAppSettingsTransient A1 { get; }
-        public IAppSettingsScoped A2 { get; }
-        public IAppSettingsSingleton A3 { get; }
+        public IAppSettingsTransient Transient { get; }
+        public IAppSettingsScoped Scoped { get; }
+        public IAppSettingsSingleton Singleton { get; }
+        public AppSettingsJson ConfigJson { get; }
+        public AppSettingsSubJson SubConfigJson { get; }
+        public ILogger Logger { get; }
 
-        public HomeController(IAppSettingsTransient a1, IAppSettingsScoped a2, IAppSettingsSingleton a3)
+        public HomeController(ILogger<HomeController> logger,IAppSettingsTransient appSettingsTransient, IAppSettingsScoped appSettingsScoped, IAppSettingsSingleton appSettingsSingleton, IOptionsSnapshot<AppSettingsJson> appconfig,IOptionsSnapshot<AppSettingsSubJson> subAppconfig)
         {
-            A1 = a1;
-            A2 = a2;
-            A3 = a3;
+            this.Logger = logger;
+            
+            Transient = appSettingsTransient;
+            Scoped = appSettingsScoped;
+            Singleton = appSettingsSingleton;
+            
+            ConfigJson = appconfig.Value;
+            SubConfigJson = subAppconfig.Value;
         }
         
         public IActionResult AppSetting()
         {
-            ViewBag.TransientName = A1.Name;
+            ViewBag.TransientName = Transient.Name;
 
-            ViewBag.ScopedName = A2.Name;
+            ViewBag.ScopedName = Scoped.Name;
 
-            ViewBag.SingletonName = A3.Name;
+            ViewBag.SingletonName = Singleton.Name;
                
             return View();
         }
+        
+        public IActionResult AppSettingJson()
+        {
+            return Content(ConfigJson.AppName+","+SubConfigJson.Version+","+SubConfigJson.Id);
+        }
 
+        public IActionResult GetSession()
+        {
+            return Content(HttpContext.Session.GetInt32("clicks").ToString());
+        }
+
+        public IActionResult Test()
+        {
+            Logger.LogInformation("Test1");
+            Logger.LogDebug("Test2");
+            Logger.LogError("Test3");
+            Logger.LogCritical("Test4");
+
+            return Content("ok, check console for log");
+        }
         
         public IActionResult Index()
         {
+            var currentValue = HttpContext.Session.GetInt32("clicks") ?? 0;
+            HttpContext.Session.SetInt32("clicks",++currentValue);
             return View();
         }
 

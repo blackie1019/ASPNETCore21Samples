@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using mvc0826.Extensions;
 using mvc0826.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +33,28 @@ namespace mvc0826
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            #region Configurarion Injection v1
+
+            var appConfig = new AppSettingsJson(); // 請先定義 AppSettings 類別
+            Configuration.Bind(appConfig);
+            
+
+            services.AddSingleton<AppSettingsJson>(appConfig);
+
+            #endregion
+
+            #region Configurarion Injection v2
+            
+            services.Configure<AppSettingsJson>(Configuration);
+
+            #endregion
+
+            #region Configuration Injection v3
+            services.Configure<AppSettingsSubJson>(
+                Configuration.GetSection("Sub"));
+
+            #endregion
+
             #region DI 練習
 
             services.AddTransient<IAppSettingsTransient, AppSettings>();
@@ -39,6 +62,14 @@ namespace mvc0826
             services.AddScoped<IAppSettingsScoped, AppSettings>();
 
             services.AddSingleton<IAppSettingsSingleton, AppSettings>();           
+
+            #endregion
+
+            #region 使用Session(建議不要用）
+
+            services.AddDistributedMemoryCache();
+            
+            services.AddSession(options => { });
 
             #endregion
 
@@ -63,9 +94,13 @@ namespace mvc0826
             }
 
             app.UseHttpsRedirection();
+            
             app.UseStaticFiles();
+            
             app.UseCookiePolicy();
 
+            app.UseSession();
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -76,7 +111,7 @@ namespace mvc0826
             #endregion
            
             #region Use app.Use 與 Middleware
-
+             
 //            app.Use(async (context, next) =>
 //            {
 //                await context.Response.WriteAsync("hello Use 1 In !"+"\r\n");
@@ -110,6 +145,11 @@ namespace mvc0826
 
             #endregion
 
+            #region Use Middleware class 
+
+//            app.UseCustomerMiddleware();
+
+            #endregion
         }
     }
 }
